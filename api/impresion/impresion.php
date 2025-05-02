@@ -1,4 +1,5 @@
 <?php
+    include "../db/conexion.php";
     $JSONData = file_get_contents("php://input");
     $dataObject = json_decode($JSONData);
     header('Access-Control-Allow-Origin: *');
@@ -13,7 +14,9 @@
     use Mike42\Escpos\PrintConnectors\FilePrintConnector;
     use Mike42\Escpos\PrintConnectors\WindowsPrintConnector;
     date_default_timezone_set('America/Mexico_City');
-    $hoy = date("Y-m-d H:i:s");  
+    $fecha_hora = new DateTime(); 
+    $hoy= $fecha_hora->format('Y-m-d H:i:s'); 
+    $fecha = date('Y-m-d');
     if($dataObject->productos !=[]){
         $connector = new WindowsPrintConnector("POS-80C-test");
         $printer = new Printer($connector);
@@ -64,5 +67,34 @@
         //$printer -> text("Gracias por su compra, vuelva pronto.\n\n");
         $printer -> cut();
         $printer -> close();
-    } 
+        //opcion = 1 impresion opcion = 2 reimpresion de ticket
+        if($dataObject->opcion == 1){
+            $query = "INSERT into ventas(fechaventa,importe) 
+            values('$hoy',$precio_total)";
+            $execute = mysqli_query($conexion,$query) or die(mysqli_error($conexion));
+            if($execute){
+                try {
+                    $last_id = $conexion->insert_id;
+                    foreach($dataObject->productos  as $item ){
+                        $query = "INSERT into detalle_ventas(cantidad,id_producto,id_venta) 
+                        values($item->cantidad,$item->idproducto,$last_id)";
+                        $execute = mysqli_query($conexion,$query) or die(mysqli_error($conexion));
+                    }
+                    echo json_encode("impresion");
+                }
+                catch (Exception $e) {
+                    echo json_encode('Excepción capturada: ',  $e->getMessage(), "\n");
+                }
+            }
+            else {
+                echo json_encode("Hubo algun error al guardar el registro");
+            }
+        }
+        else {
+            echo json_encode("reimpresion");
+        }
+    }
+    else{
+        echo json_encode("sin datos para imprimir");
+    }
 ?>

@@ -7,10 +7,13 @@
     header('content-type: application/json; charset=utf-8');
     include "../db/conexion.php";
     $result = mysqli_query(
-        $conexion,"SELECT idproducto,productos.nombre as producto, descripcion,precio,img, categorias.nombre as categorias
+        $conexion,"SELECT idproducto,productos.nombre as producto, descripcion,precio,img, categorias.nombre as categorias, medidas.nombre as medidas
         FROM productos
         INNER JOIN categorias
-        ON productos.id_categoria = categorias.idcategoria where productos.nombre LIKE '%$dataObject->text%' order by categorias.nombre;"
+        ON productos.id_categoria = categorias.idcategoria
+        INNER JOIN medidas
+        ON productos.id_medida = medidas.idmedida 
+        where productos.nombre LIKE '%$dataObject->text%' and productos.estatus = 'activo' order by categorias.nombre;"
     );
     $array = array();
     $array2 = array();

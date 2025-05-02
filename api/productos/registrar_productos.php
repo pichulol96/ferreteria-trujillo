@@ -4,8 +4,9 @@
     $descripcion =$_POST['descripcion'];
     $precio =$_POST['precio'];
     $categoria =$_POST['categoria'];
+    $medida =$_POST['medida'];
 
-    if($nombre_producto == "" || $descripcion=="" || $precio=="" || $categoria=="" ){
+    if($nombre_producto == "" || $descripcion=="" || $precio=="" || $categoria=="" || $medida=="" ){
         echo json_encode("LLene todos los campos");
         return;
     }
@@ -15,8 +16,8 @@
         if($ruta == '') {
             $ruta = 'default-image.jpg';
         }
-        $query = "INSERT into productos(nombre,descripcion,precio,img,id_categoria) 
-        values('$nombre_producto','$descripcion', $precio, '$ruta', $categoria)";
+        $query = "INSERT into productos(nombre,descripcion,precio,img,id_categoria,id_medida) 
+        values('$nombre_producto','$descripcion', $precio, '$ruta', $categoria, $medida)";
         $execute = mysqli_query($conexion,$query) or die(mysqli_error($conexion));
         if($execute){
             try {

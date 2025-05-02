@@ -146,10 +146,11 @@ include("api/db/url_base.php");
                     </div>
                 </div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer" style="justify-content: left;">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                 <button type="button"  onclick="limpiarCarrito()" class="btn btn-defautl">Limpiar carrito</button>
-                <button id="imprimir" type="button" onclick="imprimir()" class="btn btn-primary">Imprimir</button>
+                <button id="imprimir" type="button" onclick="imprimir(1)" class="btn btn-primary">Imprimir</button>
+                <button id="reimprimir" disabled=true type="button" onclick="imprimir(2)" class="btn btn-primary">Reimprimir</button>
             </div>
             </div>
         </div>
@@ -181,6 +182,10 @@ include("api/db/url_base.php");
                     let cards = document.getElementById("cards");
                     let id=0;
                     for(let comida of result) {
+                        let input ="";
+                        if(comida.medidas!="piezas"){
+                            input =`<input id="input${id}" class="form-control"/>`;
+                        }
                         cards.innerHTML +=`
                         <div class="card" style="width: 10rem; margin:auto; margin-top:20px;">
                                     <img src="archivos/${comida.img}" class="card-img-top img-fluid" alt="...">
@@ -188,7 +193,8 @@ include("api/db/url_base.php");
                                         <h5 class="card-title">${comida.producto}</h5>
                                         <p class="card-text">${comida.descripcion}</p>
                                         <p class="card-text">$${comida.precio}</p>
-                                        <button id="button${id}" type="button" class="btn btn-primary agregar_producto" onclick="agregarProducto('${comida.producto}','${comida.precio}','button${id}')">Agregar</button>
+                                        ${input}
+                                        <button style="width:100%" id="button${id}" type="button" class="btn btn-primary agregar_producto" onclick="agregarProducto('${comida.producto}','${comida.precio}','${comida.idproducto}','button${id}','${id}')">Agregar</button>
                                     </div>
                                 </div>
                         `;
@@ -199,19 +205,24 @@ include("api/db/url_base.php");
                 else {
                     let id=0;
                     for(let comida of result) {
-                    cards.innerHTML +=`
-                    <div class="card" style="width: 10rem; margin:auto; margin-top:20px; ">
-                                <img src="archivos/${comida.img}" class="card-img-top img-fluid" alt="...">
-                                <div class="card-body">
-                                    <h5 class="card-title">${comida.producto}</h5>
-                                    <p class="card-text">${comida.descripcion}</p>
-                                    <p class="card-text">$${comida.precio}</p>
-                                    <button id="button${id}" type="button" class="btn btn-primary agregar_producto" onclick="agregarProducto('${comida.producto}','${comida.precio}','button${id}')">Agregar</button>
+                        let input ="";
+                        if(comida.medidas!="piezas"){
+                            input =`<input id="input${id}" class="form-control" onchange="changeInput(${id},this.value)"/>`;
+                        }
+                        cards.innerHTML +=`
+                        <div class="card" style="width: 10rem; margin:auto; margin-top:20px; ">
+                                    <img src="archivos/${comida.img}" class="card-img-top img-fluid" alt="...">
+                                    <div class="card-body">
+                                        <h5 class="card-title">${comida.producto}</h5>
+                                        <p class="card-text">${comida.descripcion}</p>
+                                        <p class="card-text">$${comida.precio}</p>
+                                        ${input}
+                                    <button style="width:100%" id="button${id}" type="button" class="btn btn-primary agregar_producto" onclick="agregarProducto('${comida.producto}','${comida.precio}','${comida.idproducto}','button${id}','${id}')">Agregar</button>
+                                    </div>
                                 </div>
-                            </div>
-                    `;
-                    id++;
-                }
+                        `;
+                        id++;
+                    }
                 }
             }
         } catch (error) {
@@ -227,27 +238,35 @@ include("api/db/url_base.php");
         const data = { text: input.value};
         getProductos(data);
     }
-    function agregarProducto(producto,precio,id) {
+    function agregarProducto(producto,precio,idproducto,id,idArray) {
         
         let elemento = document.getElementById(id);
+        let cantidad = document.getElementById(`input${idArray}`)?.value ;
+        if(cantidad == undefined){
+            cantidad = 1;
+        }
         elemento.classList.remove('btn-primary');
         elemento.innerText ="Agregado"
         elemento.classList += " btn-success";
         let carrito = document.getElementById("contador");
         contador++;
         carrito.textContent = contador;
-        productos_carrito.push({id:idContador,producto,precio:parseFloat(precio),cantidad:1});
+        productos_carrito.push({id:idContador,idproducto,producto,precio:parseFloat(precio),cantidad});
+        document.getElementById(`input${idArray}`).value = "";
         idContador++;
 
-        const resp = productos_carrito.map(function suma(obj){
+        /*const resp = productos_carrito.map(function suma(obj){
             return obj;
-        })
-        console.log(resp);
+        })*/
+        productos_carrito.sort((a, b) => a.idproducto - b.idproducto);
+        console.log(productos_carrito);
         setTimeout(() => {
             elemento.classList.remove('btn-success');
             elemento.classList += " btn-primary";
             elemento.innerText ="Agregar"
         }, 1000);
+    }
+    function changeInput(id,valorInput){
     }
     function cargarCarrito() {
         let lista = document.getElementById("lista_productos");
@@ -265,12 +284,12 @@ include("api/db/url_base.php");
         let cantidad_total = 0;
         let id=0;
         const resp = productos_carrito.map(function suma(obj){
-            precio_total = parseFloat(precio_total) + parseFloat(obj.precio);
+            precio_total = parseFloat(precio_total) + (parseFloat(obj.precio) * parseFloat(obj.cantidad));
             cantidad_total = parseFloat(cantidad_total) + parseFloat(obj.cantidad);
             lista_productos.innerHTML +=`
             <tr id="${id}">
                     <td>${obj.producto}</td>
-                    <td class="rigth-precio">${obj.precio}</td>
+                    <td class="rigth-precio">${obj.precio * obj.cantidad}</td>
                     <td class="rigth-cantidad">${obj.cantidad} </td>
                     <td><button onclick="eliminarProducto('${id}')" class="btn btn-danger"><img class="icon-delete" src="archivos/trash_89366.svg" /></button></td>
             </tr>   
@@ -278,10 +297,11 @@ include("api/db/url_base.php");
             id++
         });
         let input_total_precio = document.getElementById("total_precio");
-        input_total_precio.value = precio_total ;
+        parseFloat(precio_total)
+        input_total_precio.value = precio_total.toFixed(2);
 
         let input_total_cantidad = document.getElementById("total_cantidad");
-        input_total_cantidad.value = cantidad_total ;
+        input_total_cantidad.value = cantidad_total.toFixed(2) ;
     }
 
 
@@ -294,7 +314,8 @@ include("api/db/url_base.php");
         productos_carrito.splice(id, 1);
         cargarCarrito();
     }
-    async function imprimir() {
+    async function imprimir(opcion) {
+        //opcion = 1 impresion opcion = 2 reimpresion
         mesa = document.getElementById("mesa").value;
         if(mesa == 'null'){
             Swal.fire({
@@ -320,13 +341,24 @@ include("api/db/url_base.php");
             } 
         } 
         try {
-            const data = {productos:agrupado2, mesa}
+            const data = {productos:agrupado2, mesa, opcion}
             const result = await request(`${url}/impresion/impresion.php`,data);
             console.log(result);
+            if(result== 'sin datos para imprimir'){
+                Swal.fire({
+                icon: "error",
+                title: "No se han agregados articulos para imprimir",
+                });
+             document.getElementById("imprimir").disabled=false;
+             document.getElementById("reimprimir").disabled=true; 
+             return;
+            }
+            document.getElementById("reimprimir").disabled=false; 
         } catch (error) {
             console.error("Error:", error);
+            document.getElementById("imprimir").disabled=false;
+            document.getElementById("reimprimir").disabled=true; 
         }
-        document.getElementById("imprimir").disabled=false;
     }
     function limpiarCarrito(){
         document.getElementById("mesa").value=null;
@@ -344,6 +376,8 @@ include("api/db/url_base.php");
         carrito.textContent = contador;
         productos_carrito=[]
         cargarCarrito();
+        document.getElementById("imprimir").disabled=false;
+        document.getElementById("reimprimir").disabled=true; 
     }
 
 </script>

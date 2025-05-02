@@ -7,12 +7,22 @@
     header('content-type: application/json; charset=utf-8');
     include "../db/conexion.php";
      try {
-        $result = mysqli_query(
+        /*$result = mysqli_query(
             $conexion,"DELETE from productos where idproducto = $dataObject->idproducto ;"
         );
         $exito = mysqli_affected_rows($conexion);
         if($exito>0){
             unlink('../../archivos/'.$dataObject->imagen);
+            echo json_encode("success");
+        }
+        else{
+            echo json_encode("Hubo algun error al eliminar el registro");
+        }*/
+        $result = mysqli_query(
+            $conexion,"UPDATE productos set estatus = 'inactivo' where idproducto = $dataObject->idproducto;"
+        );
+        $exito = mysqli_affected_rows($conexion);
+        if($exito>0){
             echo json_encode("success");
         }
         else{

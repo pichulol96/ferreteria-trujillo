@@ -72,6 +72,7 @@ include("api/db/url_base.php");
                     <th scope="col">Imagen</th>
                     <th scope="col">Precio</th>
                     <th scope="col">Categoria</th>
+                    <th scope="col">Medidas</th>
                     <th scope="col">Opciones</th>
                     </tr>
                 </thead>
@@ -139,6 +140,20 @@ include("api/db/url_base.php");
                     <input type="text" name="nombre_producto" id="nombre_producto" class="form-control input" placeholder="Nombre del producto">
                     <textarea class="form-control" name="descripcion" id="descripcion" cols="30" rows="10" placeholder="Descripcion/Presentacion"></textarea>
                     <input type="text" name="precio" id="precio" class="form-control input" placeholder="Precio">
+                    <select class="form-control" name="medida" id="medida">
+                        <option value="">
+                            Seleccionar U. medida
+                        </option>
+                        <option value="1">
+                            piezas
+                        </option>
+                        <option value="2">
+                            litros
+                        </option>
+                        <option value="3">
+                            kilos
+                        </option>
+                    </select>
                     <input type="file" onchange="renderIMG('registrar')" id="imagen" name="imagen" placeholder="Imagen" class="input">
                     </div>
 
@@ -171,6 +186,8 @@ include("api/db/url_base.php");
                     <input type="text" name="editar_nombre_producto" id="editar_nombre_producto" class="form-control input" placeholder="Nombre del producto">
                     <textarea class="form-control" name="editar_descripcion" id="editar_descripcion" cols="30" rows="10" placeholder="Descripcion/Presentacion"></textarea>
                     <input type="text" name="editar_precio" id="editar_precio" class="form-control input" placeholder="Precio">
+                    <select class="form-control" name="editar_medida" id="editar_medida">
+                    </select>
                     <input type="file" onchange="renderIMG('editar')" id="editar_imagen" name="editar_imagen" placeholder="Imagen" class="input">
 
                     <img id="editar_imgPreview"/>
@@ -229,8 +246,9 @@ include("api/db/url_base.php");
                     <td><img class="imagen" src="/ferreteria-trujillo/archivos/${obj.img}" /></td>
                     <td class="rigth-precio">${obj.precio}</td>
                     <td class="rigth-cantidad">${obj.categorias} </td>
+                    <td class="rigth-cantidad">${obj.medidas} </td>
                     <td>
-                    <button class="btn btn-success" onclick="editar_confirm('${obj.idproducto}','${obj.producto}','${obj.descripcion}','${obj.precio}','${obj.img}','${obj.categorias}')"><img class="icon-delete" src="/wafleria/archivos/pencil.svg" /></button>
+                    <button class="btn btn-success" onclick="editar_confirm('${obj.idproducto}','${obj.producto}','${obj.descripcion}','${obj.precio}','${obj.img}','${obj.categorias}','${obj.medidas}')"><img class="icon-delete" src="/wafleria/archivos/pencil.svg" /></button>
                     <button class="btn btn-danger" onclick="eliminar_confirm('${obj.idproducto}','${obj.img}')"><img class="icon-delete" src="/ferreteria-trujillo/archivos/trash_89366.svg" /></button>
                     </td>
                     
@@ -240,7 +258,10 @@ include("api/db/url_base.php");
         });
     }
 
-    async function editar_confirm(idproducto,producto,descripcion,precio,img,categoria){
+    async function editar_confirm(idproducto,producto,descripcion,precio,img,categoria,medida){
+        var medidasClean = document.querySelectorAll('#editar_medida option');
+        medidasClean.forEach(o => o.remove());
+        getMedidas(medida);
         var categorias = document.querySelectorAll('#editar_categoria option');
         categorias.forEach(o => o.remove());
         getCategorias("editar_categoria",categoria);
@@ -299,6 +320,39 @@ include("api/db/url_base.php");
         } catch (error) {
             console.error("Error:", error);
         }   
+    }
+
+    async function getMedidas(medida){
+        let result = [
+            {
+                idmedida:1,
+                nombre:'piezas'
+            },
+            {
+                idmedida:2,
+                nombre:'litros'
+            },
+            {
+                idmedida:3,
+                nombre:'kilos'
+            }
+        ]
+        let uMedida = document.getElementById("editar_medida");
+        uMedida.innerHTML +=`
+               <option value="">Seleccionar Medida</option>
+            `
+            result.map(function suma(obj){
+            if(medida==obj.nombre){
+                uMedida.innerHTML +=`
+               <option value="'${obj.idmedida}'" selected>${obj.nombre}</option>
+            `
+            }
+            else {
+                uMedida.innerHTML +=`
+               <option value="'${obj.idmedida}'">${obj.nombre}</option>
+            `
+            }
+        });
     }
 
     async function getCategorias(idcategoria,nombre) {
