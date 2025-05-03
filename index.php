@@ -101,7 +101,7 @@ include("api/db/url_base.php");
 
         <!-- Modal -->
         <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
             <div class="modal-header">
                 <h1 class="modal-title fs-5" id="exampleModalLabel">Detalles de la orden</h1>
@@ -184,7 +184,7 @@ include("api/db/url_base.php");
                     for(let comida of result) {
                         let input ="";
                         if(comida.medidas!="piezas"){
-                            input =`<input id="input${id}" class="form-control"/>`;
+                            input =`<input id="input${id}" class="form-control" placeholder="cantidad"/>`;
                         }
                         cards.innerHTML +=`
                         <div class="card" style="width: 10rem; margin:auto; margin-top:20px;">
@@ -192,7 +192,7 @@ include("api/db/url_base.php");
                                     <div class="card-body">
                                         <h5 class="card-title">${comida.producto}</h5>
                                         <p class="card-text">${comida.descripcion}</p>
-                                        <p class="card-text">$${comida.precio}</p>
+                                        <p class="card-text">$${comida.precio} ${comida.medidas}</p>
                                         ${input}
                                         <button style="width:100%" id="button${id}" type="button" class="btn btn-primary agregar_producto" onclick="agregarProducto('${comida.producto}','${comida.precio}','${comida.idproducto}','button${id}','${id}')">Agregar</button>
                                     </div>
@@ -207,7 +207,7 @@ include("api/db/url_base.php");
                     for(let comida of result) {
                         let input ="";
                         if(comida.medidas!="piezas"){
-                            input =`<input id="input${id}" class="form-control" onchange="changeInput(${id},this.value)"/>`;
+                            input =`<input id="input${id}" class="form-control" placeholder="cantidad" onchange="changeInput(${id},this.value)" onkeypress="keyUpInput(${id},event)"/>`;
                         }
                         cards.innerHTML +=`
                         <div class="card" style="width: 10rem; margin:auto; margin-top:20px; ">
@@ -215,7 +215,7 @@ include("api/db/url_base.php");
                                     <div class="card-body">
                                         <h5 class="card-title">${comida.producto}</h5>
                                         <p class="card-text">${comida.descripcion}</p>
-                                        <p class="card-text">$${comida.precio}</p>
+                                        <p class="card-text">$${comida.precio} ${comida.medidas}</p>
                                         ${input}
                                     <button style="width:100%" id="button${id}" type="button" class="btn btn-primary agregar_producto" onclick="agregarProducto('${comida.producto}','${comida.precio}','${comida.idproducto}','button${id}','${id}')">Agregar</button>
                                     </div>
@@ -245,6 +245,15 @@ include("api/db/url_base.php");
         if(cantidad == undefined){
             cantidad = 1;
         }
+        else if(cantidad != undefined){
+            if(cantidad == ''){
+                Swal.fire({
+                icon: "error",
+                title: "Introduzca una cantidad valida",
+                });
+                return;
+            }
+        }
         elemento.classList.remove('btn-primary');
         elemento.innerText ="Agregado"
         elemento.classList += " btn-success";
@@ -252,7 +261,9 @@ include("api/db/url_base.php");
         contador++;
         carrito.textContent = contador;
         productos_carrito.push({id:idContador,idproducto,producto,precio:parseFloat(precio),cantidad});
-        document.getElementById(`input${idArray}`).value = "";
+        if( document.getElementById(`input${idArray}`)){
+            document.getElementById(`input${idArray}`).value = "";
+        }
         idContador++;
 
         /*const resp = productos_carrito.map(function suma(obj){
@@ -267,6 +278,25 @@ include("api/db/url_base.php");
         }, 1000);
     }
     function changeInput(id,valorInput){
+        const numero = parseFloat(valorInput);
+        if(!isNaN(numero) && numero % 1 !== 0){
+            return;
+        }
+        else if(!isNaN(numero)){
+            return;
+        }
+        else {
+            const input = document.getElementById(`input${id}`);
+            input.value = '';
+            input.focus();
+        }
+    }
+    function keyUpInput(id,event){
+        const valid = ['0','1','2','3','4','5','6','7','8','9','.','Backspace'];
+        console.log(event.key)
+        if(!valid.includes(event.key)){
+            event.preventDefault();
+        }
     }
     function cargarCarrito() {
         let lista = document.getElementById("lista_productos");
