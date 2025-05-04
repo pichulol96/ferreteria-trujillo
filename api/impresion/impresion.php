@@ -39,32 +39,32 @@
         $printer -> setJustification(Printer::JUSTIFY_CENTER);
         $printer -> setTextSize(1,1);
         $printer -> text("Fecha: $hoy\n\n");
-        //$printer -> text("$mesa\n\n");
         $printer -> setJustification(Printer::JUSTIFY_LEFT);
-        $printer -> text("Articulo                           Precio   Cant\n\n");
+        $printer->setJustification(Printer::JUSTIFY_LEFT);
+        $printer->setEmphasis(true);
+        $printer->text(str_pad("Articulo", 33) . str_pad("Cant", 5) . str_pad("Precio", 10) . "\n");
+        $printer->setEmphasis(false);
+        $printer->text("--------------------------------------------\n");
         $precio_total=0;
         $cantidad_total=0;
         foreach($dataObject->productos  as $item ){
-            //$productos=($item->producto);
-            $printer -> setJustification(Printer::JUSTIFY_RIGHT);
-            $printer -> text("$item->producto"."                  "."$item->precio"."     "."$item->cantidad\n");
+            $printer->text(str_pad($parte = substr($item->producto, 0, 32), 33) . str_pad($item->cantidad, 5) . str_pad("$".$item->precio, 10) . "\n");
             $precio_total=$precio_total+$item->precio;
             $cantidad_total=$cantidad_total+$item->cantidad;
-            //$printer -> setJustification(Printer::JUSTIFY_CENTER);
-           // $printer -> text("$item->precio");
-            //$printer -> feed();
-            //$printer -> setJustification(Printer::JUSTIFY_RIGHT);
-            //$printer -> text("$item->cantidad\n");
-            //echo json_encode($item->producto);
         }
-        $printer -> text("\n\n");
+        $printer -> text("\n");
+        $printer -> setJustification(Printer::JUSTIFY_LEFT);
+        $printer->text("--------------------------------------------\n");
+        $printer->setEmphasis(true);
+        $printer->text(str_pad("Total:", 33) . str_pad($cantidad_total, 5) . str_pad("$".$precio_total, 10) . "\n\n\n");
         $printer -> setJustification(Printer::JUSTIFY_RIGHT);
-        $printer -> text("Total"."--------------------------------$ "."$precio_total"."  "."$cantidad_total");
+        $printer->text(str_pad("Pago en efectivo:", 20) . str_pad("$".$dataObject->recibo, 10) . "\n");
+        $printer->text(str_pad("Cambio:", 20) . str_pad("$".$dataObject->cambio, 10) . "\n");
+        $printer->setEmphasis(false);
         $printer -> text("\n\n");
         $printer -> setTextSize(1,1);
         $printer -> setJustification(Printer::JUSTIFY_CENTER);
         $printer -> text("Gracias por su compra, vuelva pronto.\n\n");
-        //$printer -> text("Gracias por su compra, vuelva pronto.\n\n");
         $printer -> cut();
         $printer -> close();
         //opcion = 1 impresion opcion = 2 reimpresion de ticket

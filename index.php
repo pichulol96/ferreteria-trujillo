@@ -367,6 +367,7 @@ include("api/db/url_base.php");
     async function imprimir(opcion) {
         //opcion = 1 impresion opcion = 2 reimpresion
         const recibo = document.getElementById("recibo");
+        const cambio = document.getElementById("cambio").value;
         if(recibo.value == ''){
             recibo.focus();
             Swal.fire({
@@ -394,7 +395,7 @@ include("api/db/url_base.php");
             } 
         } 
         try {
-            const data = {productos:agrupado2, recibo:recibo.value, opcion}
+            const data = {productos:agrupado2, recibo:recibo.value,cambio, opcion}
             const result = await request(`${url}/impresion/impresion.php`,data);
             console.log(result);
             if(result== 'sin datos para imprimir'){
