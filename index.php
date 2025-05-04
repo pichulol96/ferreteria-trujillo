@@ -9,8 +9,8 @@ include("api/db/url_base.php");
     <link href="/ferreteria-trujillo/plugins/bootstrap/bootstrap.min.css" rel="stylesheet">
     <script src="/ferreteria-trujillo/plugins/bootstrap/bootstrap.bundle.min.js"></script>
     <title>Ferreteria</title>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.all.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.5/dist/sweetalert2.min.css">
+    <script src="/ferreteria-trujillo/plugins/sweetalert2/sweetalert2.all.min.js"></script>
+    <link rel="stylesheet" href="/ferreteria-trujillo/plugins/sweetalert2/sweetalert2.min.css">
 </head>
 <style>
     input{
