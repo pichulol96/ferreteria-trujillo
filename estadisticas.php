@@ -79,18 +79,35 @@ include("api/db/url_base.php");
             </div>
         </div>
         <div class="shadow p-3 mb-5 bg-body-tertiary rounded table-responsive">
-        <table id="tabla" class="table table-striped table-hover">
-                <thead>
-                    <tr>
-                    <th scope="col">ID</th>
-                    <th scope="col">Fecha de la venta</th>
-                    <th scope="col">Importe</th>
-                    <th scope="col">Opciones</th>
-                    </tr>
-                </thead>
-                <tbody id="lista_productos">
-                </tbody>
-        </table>
+            <table id="tabla" class="table table-striped table-hover">
+                    <thead>
+                        <tr>
+                        <th scope="col">ID</th>
+                        <th scope="col">Fecha de la venta</th>
+                        <th scope="col">Importe</th>
+                        <th scope="col">Opciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="lista_productos">
+                    </tbody>
+            </table>
+        </div>
+        <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Detalles venta</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    ...
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary">Guardar cambios</button>
+                </div>
+                </div>
+            </div>
         </div>
     </div>
 </body>
@@ -139,6 +156,7 @@ include("api/db/url_base.php");
                     <td>
                     <button class="btn btn-success" onclick="editar_confirm('${obj.idproducto}','${obj.producto}','${obj.descripcion}','${obj.precio}','${obj.img}','${obj.categorias}')"><img class="icon-delete" src="/wafleria/archivos/pencil.svg" /></button>
                     <button class="btn btn-danger" onclick="eliminar_confirm('${obj.idproducto}','${obj.img}')"><img class="icon-delete" src="/ferreteria-trujillo/archivos/trash_89366.svg" /></button>
+                    <button class="btn btn-info" onclick="verDetalles('${obj.idventa}')"><img class="icon-delete" src="/ferreteria-trujillo/archivos/ojo.png" /></a>
                     </td>
                     
             </tr>   
@@ -187,6 +205,13 @@ include("api/db/url_base.php");
                 console.error("Error:", error);
             }
         }
+    }
+    function verDetalles(idVenta){
+        console.log(idVenta);
+        const myModal = new bootstrap.Modal('#exampleModal', {
+         keyboard: false
+        })
+        myModal.show();
     }
 </script>
 </html>

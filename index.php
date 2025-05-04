@@ -62,10 +62,27 @@ include("api/db/url_base.php");
     }
     #total_precio{
         text-align: right;
-        width: 80px;
+        width: 110px;
     }
     #total_cantidad{
         text-align: right;
+        width: 100px;
+    }
+    .label{
+        color: blue;
+        font-weight: bold;
+    }
+    @media only screen and (max-width: 600px) {
+        #total_precio{
+            text-align: right;
+            width: 90px;
+        }
+        #total_cantidad{
+            width: 70px;
+        }
+        .total{
+            width: 100px;
+        }
     }
 </style>
 <body>
@@ -108,26 +125,12 @@ include("api/db/url_base.php");
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <select name="mesa" id="mesa" class="form-control">
-                    <option value="null">Seleccione una mesa</option>
-                    <option value="uno">uno</option>
-                    <option value="dos">dos</option>
-                    <option value="tres">tres</option>
-                    <option value="cuatro">cuatro</option>
-                    <option value="cuatro">cinco</option>
-                    <option value="cuatro">seis</option>
-                    <option value="cuatro">siete</option>
-                    <option value="cuatro">ocho</option>
-                    <option value="cuatro">nueve</option>
-                    <option value="diez">diez</option>
-                    <option value="pedido">pedido</option>
-                </select> <br>
                 <table id="tabla" class="table">
                 <thead>
                     <tr>
                     <th scope="col">Productos</th>
-                    <th scope="col">Precio</th>
-                    <th scope="col">Cantidad</th>
+                    <th style="text-align:right;" scope="col">Precio</th>
+                    <th style="text-align:right;" scope="col">Cantidad</th>
                     <th scope="col">Opcion</th>
                     </tr>
                 </thead>
@@ -136,13 +139,27 @@ include("api/db/url_base.php");
                 </table>
                 <div id="cont2" class="row">
                     <div class=" col-5 col-sm-5">
-                    <input type="text" disabled class="form-control" placeholder="total">
+                    <input type="text" id="total" style="font-weight:bold;" disabled class="form-control total" placeholder="total">
                     </div>
                     <div class="col-3 col-sm-3">
                     <input type="text"id="total_precio" disabled class="form-control">
                     </div>
-                    <div class="col-2 col-sm-2">
+                    <div class="col-3 col-sm-3">
                     <input type="text" id="total_cantidad" disabled class="form-control">
+                    </div>
+                </div>
+                <div clas="row" style="display:flex; align-items:center;">
+                    <div class="col-2">
+                      <label class="label" for="">Recibo</label>
+                    </div>
+                    <div class="col-4" style="padding-right:10px;">
+                      <input type="text" onchange="changeCambio(this.value)" placeholder="Recibo $" class="form-control" id="recibo" name="recibo">
+                    </div>
+                    <div class="col-2">
+                      <label class="label" for="">Cambio</label>
+                    </div>
+                    <div class="col-4">
+                      <input type="text"disabled="true" placeholder="Cambio $" class="form-control" id="cambio" name="cambio">
                     </div>
                 </div>
             </div>
@@ -291,6 +308,9 @@ include("api/db/url_base.php");
             input.focus();
         }
     }
+    function changeCambio(valorInput){
+        document.getElementById("cambio").value = valorInput - document.getElementById("total_precio").value
+    }
     function keyUpInput(id,event){
         const valid = ['0','1','2','3','4','5','6','7','8','9','.','Backspace'];
         console.log(event.key)
@@ -346,12 +366,13 @@ include("api/db/url_base.php");
     }
     async function imprimir(opcion) {
         //opcion = 1 impresion opcion = 2 reimpresion
-        mesa = document.getElementById("mesa").value;
-        if(mesa == 'null'){
+        const recibo = document.getElementById("recibo");
+        if(recibo.value == ''){
+            recibo.focus();
             Swal.fire({
                 icon: "error",
-                title: "Seleccione la mesa",
-                });
+                title: "Indique la cantidad con la que le pagan",
+            });
             return
         }
         document.getElementById("imprimir").disabled=true;
@@ -362,16 +383,18 @@ include("api/db/url_base.php");
             let existe = agrupado2.filter(x=> x.producto == iterator.producto).length ==0 ? true: false 
             if(existe){ 
                 let filtrado = arrayProductos.filter(x=> x.producto == iterator.producto) 
-                let buscar = structuredClone(arrayProductos.find(x=> x.producto == iterator.producto))  
-                let cantidad = filtrado.length 
-                let total = Object.values(filtrado).reduce((t, {precio}) => t + precio, 0);   
+                let buscar = structuredClone(arrayProductos.find(x=> x.producto == iterator.producto))
+                console.log(buscar);
+                //let cantidad = filtrado.cantidad 
+                let cantidad = Object.values(filtrado).reduce((t, {cantidad}) => t + parseFloat(cantidad), 0); 
+                let total = Object.values(filtrado).reduce((t, {precio,cantidad}) => t + (precio *cantidad), 0);   
                 buscar.precio = total 
                 buscar.cantidad = cantidad 
                 agrupado2.push(buscar) 
             } 
         } 
         try {
-            const data = {productos:agrupado2, mesa, opcion}
+            const data = {productos:agrupado2, recibo:recibo.value, opcion}
             const result = await request(`${url}/impresion/impresion.php`,data);
             console.log(result);
             if(result== 'sin datos para imprimir'){
@@ -391,7 +414,8 @@ include("api/db/url_base.php");
         }
     }
     function limpiarCarrito(){
-        document.getElementById("mesa").value=null;
+        document.getElementById("recibo").value='';
+        document.getElementById("cambio").value='';
         let tupla;
         productos_carrito.map(function(obj){
             console.log(obj.id);
